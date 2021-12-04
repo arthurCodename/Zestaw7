@@ -32,58 +32,61 @@ class Frac:
          return float(self.x/self.y) >= float(other.x/other.y)
 
     def __add__(self, other):
-        if self.y == other.y:
-            return Frac(self.x + other.x, self.y)
-       
-        elif other.y == 1:
-            return Frac((self.x + other.x * self.y), self.y)
+        if isinstance(other, Frac):
+            if self.y == other.y:
+                return Frac(self.x + other.x, self.y)
+            elif not (self.y == other.y):
+                return Frac((self.x * other.y + self.y * other.x ), (self.y * other.y))
 
-        else:
-            return Frac((self.x * other.y + self.y * other.x ), (self.y * other.y))
-
+        elif isinstance(other, int):
+            return Frac(self.x + self.y * other, self.y)
 
     __radd__ = __add__              # int+frac
 
     def __sub__(self, other):
-          # frac1-frac2, frac-int
-        if self.y == other.y:
-            return Frac(self.x - other.x, self.y)
-       
-        elif other.y == 1:
-            return Frac(self.x - self.y * other.x, self.y)
+        if isinstance(other, Frac): 
+            if self.y == other.y:
+                return Frac(self.x - other.x, self.y)
+            elif not (self.y == other.y):
+                return Frac((self.x * other.y - self.y * other.x ), (self.y * other.y))
 
-        else:
-            return Frac((self.x * other.y - self.y * other.x ), (self.y * other.y))
-
+        elif isinstance(other, int):
+            return Frac(self.x - self.y * other, self.y)
 
     def __rsub__(self, other):      # int-frac
-        
-        return Frac(self.x * other.y - other.x, other.y)
+        return Frac(self.y * other - self.x, self.y)
 
     def __mul__(self, other): 
-        # frac1*frac2, frac*int
-        return Frac(self.x * other.x, self.y * other.y)
+
+        if isinstance(other, Frac):
+                return Frac(self.x*other.x, self.y * other.y)
+
+        elif isinstance(other, int):
+            return Frac(self.x * other, self.y) 
 
     __rmul__ = __mul__              # int*frac
 
     def __truediv__(self, other): 
-        if other.y == 1: 
-            return Frac(self.x, self.y * other.x)
-        else: 
+        # if other.y == 1: 
+        #     return Frac(self.x, self.y * other.x)
+        # else: 
+        #     return Frac(self.x * other.y, self.y * other.x)
+
+        if isinstance(other, Frac):
             return Frac(self.x * other.y, self.y * other.x)
 
+        elif isinstance(other, int):
+            return Frac(self.x, self.y * other)
+
     def __rtruediv__(self, other):
-        if self.y == 1: 
-           return Frac(self.x * other.y, other.x)
-        else:
-            return Frac(self.x * other.y, self.y * other.x) 
+        return Frac(self.y * other, self.x)
 
     # operatory jednoargumentowe
     def __pos__(self):  # +frac = (+1)*frac
         return Frac(self.x, self.y)
 
     def __neg__(self): 
-        return Frac(self.x, self.y)         # -frac = (-1)*frac
+        return (-1) * Frac(self.x, self.y)         # -frac = (-1)*frac
 
     def __invert__(self):       # odwrotnosc: ~frac
          return Frac(self.y, self.x) 
@@ -97,8 +100,6 @@ class Frac:
 
 
 # Kod testujący moduł.
-
-print(Frac.__str__(Frac(2,2)))
 
 import unittest
 
@@ -125,22 +126,24 @@ class TestFrac(unittest.TestCase):
 
     def test__sub__(self):
         self.assertEqual(Frac.__sub__(Frac(5,6), Frac(3,6)), Frac(2, 6))
-        self.assertEqual(Frac.__sub__(Frac(5,6), Frac(3,1)), Frac(-13, 6))
+        self.assertEqual(Frac.__sub__(Frac(5,6), 3), Frac(-13, 6))
         self.assertEqual(Frac.__sub__(Frac(5,6), Frac(3,4)), Frac(2, 24))
 
     def test__rsub__(self):
-        self.assertEqual(Frac.__rsub__(Frac(3,1), Frac(5,6)), Frac(13, 6))
+        self.assertEqual(Frac.__rsub__(Frac(5,6), 3), Frac(13, 6))
        
     def test__mul__(self):
         self.assertEqual(Frac.__mul__(Frac(1,2), Frac(3,4)), Frac(3,8))
+        self.assertEqual(Frac.__mul__(Frac(3,7), 2), Frac(6, 7))
 
     def test__truediv(self):
         self.assertEqual(Frac.__truediv__(Frac(1, 2), Frac(3,4)), Frac(4,6))
-        self.assertEqual(Frac.__truediv__(Frac(1, 2), Frac(3,1)), Frac(1,6))
+        self.assertEqual(Frac.__truediv__(Frac(1, 2), 3), Frac(1,6))
 
     def test__rtruediv(self):
-        self.assertEqual(Frac.__rtruediv__(Frac(3, 1), Frac(1,2)), Frac(6,1))
-        self.assertEqual(Frac.__rtruediv__(Frac(1, 2), Frac(3,1)), Frac(1,6))
+        self.assertEqual(Frac.__rtruediv__(Frac(1, 2), 3), Frac(6,1))
+        self.assertEqual(Frac.__rtruediv__(Frac(7, 13), 3), Frac(39,7))
+        self.assertEqual(Frac.__rtruediv__(Frac(1, 2), 3), Frac(6,1))
     
     def test_invert__(self):
         self.assertEqual(Frac.__invert__(Frac(1,2)), Frac(2,1))
@@ -149,3 +152,5 @@ class TestFrac(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
